@@ -16,7 +16,8 @@ unsigned char Phone_ID[16] = {0};
 unsigned char Board_ID[2] = {0};
 unsigned char Phone_IP[4] = {0};
 unsigned char Board_IP[4] = {0};
-unsigned char Bar_code[10] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
+//unsigned char Bar_code[10] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
+unsigned char Bar_code[6] = {0};
 unsigned char wifi_data_len = 0;
 unsigned char is_First_connect = 1;
 //void insert(void *a,void *ins,int index,size_t n,size_t width)
@@ -228,7 +229,7 @@ void wifi_data_deal(unsigned char *data_buf, unsigned char num)
 	{				//第一次连接的时候，需要判断二维码是否与存储的二维码相同，如果相同则连接；
 					//后续的断线重连，需要判断手机ID是否与第一次连接时存储的相同，如果相同的话，继续判断手机IP是否改变，
 		case 0x75:	//如果改变则需要重新配置UDPC的IP参数
-			for(i = 0; i < 10; i++)//任何情况下收到连接请求都需要判断二维码是否正确
+			for(i = 0; i < 6; i++)//任何情况下收到连接请求都需要判断二维码是否正确
 			{
 				if(*(data_buf + 27 + i) != Bar_code[i])
 				{
@@ -256,8 +257,8 @@ void wifi_data_deal(unsigned char *data_buf, unsigned char num)
 						//Phone_ID[1] = *(data_buf + 26);
 					}
 					//白板ID
-					Board_ID[0] = *(data_buf + 35);
-					Board_ID[1] = *(data_buf + 36);
+					Board_ID[0] = *(data_buf + 31);
+					Board_ID[1] = *(data_buf + 32);
 					wifi_ack_send(0x76, 0);
 				}
 				else
@@ -286,7 +287,7 @@ void wifi_data_deal(unsigned char *data_buf, unsigned char num)
 			}
 			break;
 		case 0x78://心跳包
-			for(i = 0; i < 10; i++)//任何情况下收到连接请求都需要判断二维码是否正确
+			for(i = 0; i < 6; i++)//任何情况下收到连接请求都需要判断二维码是否正确
 			{
 				if(*(data_buf + 27 + i) != Bar_code[i])
 				{

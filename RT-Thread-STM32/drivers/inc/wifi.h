@@ -36,6 +36,7 @@ extern unsigned char Phone_ID[16];
 extern unsigned char Board_ID[2];
 extern unsigned char Phone_IP[4];
 extern unsigned char Board_IP[4];
+extern unsigned char Bar_code[6];
 extern unsigned char wifi_data_len;
 extern unsigned char is_First_connect;
 
