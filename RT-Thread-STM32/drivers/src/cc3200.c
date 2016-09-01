@@ -9,7 +9,6 @@
 u8 socket_start = 0;
 u8 Pre_Phone_IP[4] = {0};
 u8 RT_Phone_IP[16] = {0};
-u8 Local_IP[4]={0};	// 本地IP
 u8 MAC_BUF[15] = {0};
 const u8* Local_Port  = "9002";		// 本地端口号
 const u8* PORT_Server = "9001";		// 远程端口号
@@ -143,8 +142,8 @@ void wifi_reset(void)
 	sprintf((char*)USART2_TX_BUF, "%s", "AT+RESET");
 	cc3200_send_cmd(USART2_TX_BUF, "Reset", 150);		// "Reset All Config!"
 	rt_thread_delay(5000);
-	cc3200_Hardware_Reset();		// 重启有效，不可屏蔽
 	rt_thread_delay(5000);			// 足够的延时，等待响应
+	cc3200_Hardware_Reset();		// 重启有效，不可屏蔽
 }
 
 /*******************************************************************************
@@ -442,8 +441,58 @@ void socket_stop(void)
 	sprintf((char*)USART2_TX_BUF, "AT+SOCK=%s,%s,%s,%s", CC3200_WORKMODE_TBL[0], Local_Port, IP, PORT);		// TCPS,9002,0.0.0.0,0
 	cc3200_send_cmd(USART2_TX_BUF, "Set Socket CFG:", 100);	
 	socket_start = 1;
-	rt_thread_delay(100);	
+	rt_thread_delay(100);
 	cc3200_send_cmd("AT+RST", "Device Restart...", 300);
 	rt_thread_delay(3000);
+}
+void MAC_to_binary(unsigned char* data, unsigned char* mac_buf)	
+{
+	unsigned char i, j, data_t=0;
+	for(j = 0; j < 6; j++)
+	{
+		for(i = 0; i < 2; i++)
+		{
+			if(data[i + j * 2] > 64 && data[i + j * 2] < 71)
+			{
+				data_t *= 16;
+				data_t += data[i + j * 2] - '7';	// 大写字母转换成16进制
+			}
+			else if(data[i + j * 2] > 47 && data[i + j * 2] < 58)
+			{
+				data_t *= 16;
+				data_t += data[i + j * 2] - '0'; 
+			}
+		}
+		mac_buf[j] = data_t; 
+		data_t = 0;
+	}
+}
+/*******************************************************************************
+* 函数名  : cc3200_get_MAC
+* 描述    : 获取 MAC
+* 返回值  : 无
+* 说明    : 参数一 字符型，参数二 十六进制
+*******************************************************************************/
+unsigned char cc3200_get_MAC(unsigned char *macbuf, unsigned char* bar_buf)		
+{
+	unsigned char *p, *p1;
+	socket_start = 0;
+	cc3200_Hardware_Reset();
+	cc3200_send_cmd("+++", "Switch AT Command Mode!", 100);
+	rt_thread_delay(1500);
+	if(cc3200_send_cmd("AT+MAC", "Chip", 100) == 0)
+	{
+		p = cc3200_check_cmd("0x");
+		p1 = (unsigned char*)strstr((const char*)(p + 2), "\r");
+		*p1 = 0;		// 添加结束符
+		sprintf((char*)macbuf, "%s", p + 2);	
+	}
+	if((char*)macbuf == 0)
+		return 1;
+	else 
+	{
+		MAC_to_binary(macbuf, bar_buf);
+		return 0;
+	}
 }
 
