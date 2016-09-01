@@ -27,7 +27,16 @@ Project File Date:  08/30/2016
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 3 (build 300)', folder: 'D:\Program Files\Keil_v5\ARM\ARMCC\Bin'
 Build target 'rtthread-stm32'
-"..\obj\project.axf" - 0 Error(s), 0 Warning(s).
+compiling wifi.c...
+..\drivers\src\wifi.c(219): warning:  #177-D: variable "sum" was declared but never referenced
+  	unsigned char sum = 0;
+..\drivers\src\wifi.c: 1 warning, 0 errors
+linking...
+..\obj\project.axf: Warning: L6319W: Ignoring --keep command. Cannot find section *.o(FSymTab).
+..\obj\project.axf: Warning: L6319W: Ignoring --keep command. Cannot find section *.o(VSymTab).
+Program Size: Code=32916 RO-data=2532 RW-data=976 ZI-data=9976  
+Finished: 0 information, 2 warning and 0 error messages.
+"..\obj\project.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 

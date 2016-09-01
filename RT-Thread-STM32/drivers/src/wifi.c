@@ -13,6 +13,7 @@
 	
 unsigned char wifi_data_to_send[255] = {0};
 unsigned char Phone_ID[16] = {0};
+unsigned char BroadcastPhone_ID[16] = {0};
 unsigned char Board_ID[2] = {0};
 unsigned char Phone_IP[4] = {0};
 unsigned char Board_IP[4] = {0};
@@ -123,7 +124,9 @@ void wifi_ack_send(unsigned char code, unsigned short para) //发送应答信息指令0x
 			wifi_data_to_send[16] = 0xED;		
 			wifi_data_len=17;	//发送字符串长度
 			break;
-		case(0x78):
+		case(0x78)://用于设备是否联网的检测
+			wifi_data_to_send[3] = BroadcastPhone_ID[14];
+			wifi_data_to_send[4] = BroadcastPhone_ID[15];
 			wifi_data_to_send[5] = 0x08;
 			wifi_data_to_send[6] = 0x00;
 	
@@ -134,8 +137,8 @@ void wifi_ack_send(unsigned char code, unsigned short para) //发送应答信息指令0x
 
 			wifi_data_to_send[11] = Board_ID[0];
 			wifi_data_to_send[12] = Board_ID[1];
-			wifi_data_to_send[13] = Phone_ID[14];
-			wifi_data_to_send[14] = Phone_ID[15];
+			wifi_data_to_send[13] = BroadcastPhone_ID[14];
+			wifi_data_to_send[14] = BroadcastPhone_ID[15];
 			sum = 0;
 			for(i = 0; i < 15; i ++)
 			{
@@ -286,7 +289,7 @@ void wifi_data_deal(unsigned char *data_buf, unsigned char num)
 				}
 			}
 			break;
-		case 0x78://心跳包
+		case 0x78://用于检测白板是否接入局域网
 			for(i = 0; i < 6; i++)//任何情况下收到连接请求都需要判断二维码是否正确
 			{
 				if(*(data_buf + 27 + i) != Bar_code[i])
@@ -307,7 +310,7 @@ void wifi_data_deal(unsigned char *data_buf, unsigned char num)
 				//手机ID
 				for(i = 0; i < 16; i ++)
 				{
-					Phone_ID[i] = *(data_buf + 11 + i);
+					BroadcastPhone_ID[i] = *(data_buf + 11 + i);
 					//Phone_ID[1] = *(data_buf + 26);
 				}
 				//白板ID
