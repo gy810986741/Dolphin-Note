@@ -283,10 +283,13 @@ void cc3200_get_staip(u8* Local_IP)
 void cc3200_set_udpPort(void)
 {
 	u8 Radio_IP[16] = {0};
+	socket_start = 0;
+	cc3200_send_cmd("+++", "Switch AT Command Mode!", 50);
 	sprintf((char*)Radio_IP, "%d.%d.%d.%d", Board_IP[0],Board_IP[1],Board_IP[2],255);
 	sprintf((char*)USART2_TX_BUF, "AT+SOCK=%s,%s,%s,%s", CC3200_WORKMODE_TBL[3], Local_Port, Radio_IP, PORT_Server);
 	cc3200_send_cmd(USART2_TX_BUF, "Set Socket CFG:", 100);
 	socket_start = 1;
+//	rt_thread_delay(1500);
 	cc3200_send_cmd("AT+RST", "Device Restart...", 300);
 	rt_thread_delay(3000);
 	while(GPIO_ReadInputDataBit(CC3200_Socket_PORT, CC3200_Socket_Pin) == 1)
