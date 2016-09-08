@@ -325,6 +325,7 @@ void wifi_data_deal(unsigned char *data_buf, unsigned char num)
 		case 0xA9://心跳包
 			wifi_ack_send(0x77, 0);
 			is_idle_flag = 1;
+			FlashScreenDataSeq.SeqRearAddr = FlashScreenDataSeq.SeqReadAddr ;			//将计数器清零
 			break;
 		case 0xA1:{//接到手机发送的会议结束指令
 			meeting_end_flag = 1;
@@ -348,7 +349,7 @@ void wifi_data_deal(unsigned char *data_buf, unsigned char num)
 			break;		
 			}
 		case 0xA6:{//白板触屏信息
-			wifi_ack_send(0xB2,0);	
+			wifi_ack_send(0xB2,0);
 			break;
 			}
 		case 0xa7:{//硬件版本号信息

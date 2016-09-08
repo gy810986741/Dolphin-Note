@@ -39,7 +39,7 @@ typedef struct
 	unsigned int			SeqRearAddr;//队列的底部，出数据
 	unsigned int			SeqReadAddr;
 }FlashSeq_structdef;
-
+extern FlashSeq_structdef FlashScreenDataSeq;
 extern unsigned int time_base;
 extern unsigned char up_down_flag;
 extern unsigned char pen_data_ready;
@@ -50,6 +50,7 @@ extern unsigned char is_idle_flag;
 extern unsigned char meeting_end_flag;
 extern unsigned char time_checking_flag;
 extern unsigned char searching_flag;
+extern unsigned char point_cnt;
 void Screen_data_analize(unsigned char *data_buf,unsigned char num);
 void ScreenRecSeqInit(void);
 State_typedef ScreenRecSeqIn(unsigned char *_DataFrame, unsigned char _DataLen);

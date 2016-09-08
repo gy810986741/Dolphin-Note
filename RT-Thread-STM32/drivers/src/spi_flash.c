@@ -43,57 +43,57 @@
 *******************************************************************************/
 void SPI_FLASH_Init(void)
 {
-  SPI_InitTypeDef  SPI_InitStructure;
-  GPIO_InitTypeDef GPIO_InitStructure;
-  
-  /* Enable SPI1 and GPIO clocks */
-  /*!< SPI_FLASH_SPI_CS_GPIO, SPI_FLASH_SPI_MOSI_GPIO, 
-       SPI_FLASH_SPI_MISO_GPIO, SPI_FLASH_SPI_DETECT_GPIO 
-       and SPI_FLASH_SPI_SCK_GPIO Periph clock enable */
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOC, ENABLE);
+	SPI_InitTypeDef  SPI_InitStructure;
+	GPIO_InitTypeDef GPIO_InitStructure;
 
-  /*!< SPI_FLASH_SPI Periph clock enable */
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
- 
-  
-  /*!< Configure SPI_FLASH_SPI pins: SCK */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
+	/* Enable SPI1 and GPIO clocks */
+	/*!< SPI_FLASH_SPI_CS_GPIO, SPI_FLASH_SPI_MOSI_GPIO, 
+	   SPI_FLASH_SPI_MISO_GPIO, SPI_FLASH_SPI_DETECT_GPIO 
+	   and SPI_FLASH_SPI_SCK_GPIO Periph clock enable */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOC, ENABLE);
 
-  /*!< Configure SPI_FLASH_SPI pins: MISO */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
+	/*!< SPI_FLASH_SPI Periph clock enable */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
 
-  /*!< Configure SPI_FLASH_SPI pins: MOSI */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  /*!< Configure SPI_FLASH_SPI_CS_PIN pin: SPI_FLASH Card CS pin */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
+	/*!< Configure SPI_FLASH_SPI pins: SCK */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  /* Deselect the FLASH: Chip Select high */
-  SPI_FLASH_CS_HIGH();
+	/*!< Configure SPI_FLASH_SPI pins: MISO */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  /* SPI1 configuration */
-  // W25X16: data input on the DIO pin is sampled on the rising edge of the CLK. 
-  // Data on the DO and DIO pins are clocked out on the falling edge of CLK.
-  SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-  SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
-  SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
-  SPI_InitStructure.SPI_CPOL = SPI_CPOL_High;
-  SPI_InitStructure.SPI_CPHA = SPI_CPHA_2Edge;
-  SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
-  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
-  SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
-  SPI_InitStructure.SPI_CRCPolynomial = 7;
-  SPI_Init(SPI1, &SPI_InitStructure);
+	/*!< Configure SPI_FLASH_SPI pins: MOSI */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  /* Enable SPI1  */
-  SPI_Cmd(SPI1, ENABLE);
+	/*!< Configure SPI_FLASH_SPI_CS_PIN pin: SPI_FLASH Card CS pin */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	/* Deselect the FLASH: Chip Select high */
+	SPI_FLASH_CS_HIGH();
+
+	/* SPI1 configuration */
+	// W25X16: data input on the DIO pin is sampled on the rising edge of the CLK. 
+	// Data on the DO and DIO pins are clocked out on the falling edge of CLK.
+	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
+	SPI_InitStructure.SPI_CPOL = SPI_CPOL_High;
+	SPI_InitStructure.SPI_CPHA = SPI_CPHA_2Edge;
+	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
+	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+	SPI_InitStructure.SPI_CRCPolynomial = 7;
+	SPI_Init(SPI1, &SPI_InitStructure);
+
+	/* Enable SPI1  */
+	SPI_Cmd(SPI1, ENABLE);
 }
 
 /*******************************************************************************
@@ -105,25 +105,25 @@ void SPI_FLASH_Init(void)
 *******************************************************************************/
 void SPI_FLASH_SectorErase(u32 SectorAddr)
 {
-  SectorAddr = SectorAddr << 12;
-  /* Send write enable instruction */
-  SPI_FLASH_WriteEnable();
-  SPI_FLASH_WaitForWriteEnd();
-  /* Sector Erase */
-  /* Select the FLASH: Chip Select low */
-  SPI_FLASH_CS_LOW();
-  /* Send Sector Erase instruction */
-  SPI_FLASH_SendByte(W25X_SectorErase);
-  /* Send SectorAddr high nibble address byte */
-  SPI_FLASH_SendByte((SectorAddr & 0xFF0000) >> 16);
-  /* Send SectorAddr medium nibble address byte */
-  SPI_FLASH_SendByte((SectorAddr & 0xFF00) >> 8);
-  /* Send SectorAddr low nibble address byte */
-  SPI_FLASH_SendByte(SectorAddr & 0xFF);
-  /* Deselect the FLASH: Chip Select high */
-  SPI_FLASH_CS_HIGH();
-  /* Wait the end of Flash writing */
-  SPI_FLASH_WaitForWriteEnd();
+	SectorAddr = SectorAddr << 12;
+	/* Send write enable instruction */
+	SPI_FLASH_WriteEnable();
+	SPI_FLASH_WaitForWriteEnd();
+	/* Sector Erase */
+	/* Select the FLASH: Chip Select low */
+	SPI_FLASH_CS_LOW();
+	/* Send Sector Erase instruction */
+	SPI_FLASH_SendByte(W25X_SectorErase);
+	/* Send SectorAddr high nibble address byte */
+	SPI_FLASH_SendByte((SectorAddr & 0xFF0000) >> 16);
+	/* Send SectorAddr medium nibble address byte */
+	SPI_FLASH_SendByte((SectorAddr & 0xFF00) >> 8);
+	/* Send SectorAddr low nibble address byte */
+	SPI_FLASH_SendByte(SectorAddr & 0xFF);
+	/* Deselect the FLASH: Chip Select high */
+	SPI_FLASH_CS_HIGH();
+	/* Wait the end of Flash writing */
+	SPI_FLASH_WaitForWriteEnd();
 }
 
 /*******************************************************************************
@@ -136,24 +136,24 @@ void SPI_FLASH_SectorErase(u32 SectorAddr)
 void SPI_FLASH_BlockErase(u32 BlockAddr)
 {
 	BlockAddr = BlockAddr << 16;
-  /* Send write enable instruction */
-  SPI_FLASH_WriteEnable();
-  SPI_FLASH_WaitForWriteEnd();
-  /* Block Erase */
-  /* Select the FLASH: Chip Select low */
-  SPI_FLASH_CS_LOW();
-  /* Send Block Erase instruction */
-  SPI_FLASH_SendByte(W25X_BlockErase);
-  /* Send BlockAddr high nibble address byte */
-  SPI_FLASH_SendByte((BlockAddr & 0xFF0000) >> 16);
-  /* Send BlockAddr medium nibble address byte */
-  SPI_FLASH_SendByte((BlockAddr & 0xFF00) >> 8);
-  /* Send BlockAddr low nibble address byte */
-  SPI_FLASH_SendByte(BlockAddr & 0xFF);
-  /* Deselect the FLASH: Chip Select high */
-  SPI_FLASH_CS_HIGH();
-  /* Wait the end of Flash writing */
-  SPI_FLASH_WaitForWriteEnd();
+	/* Send write enable instruction */
+	SPI_FLASH_WriteEnable();
+	SPI_FLASH_WaitForWriteEnd();
+	/* Block Erase */
+	/* Select the FLASH: Chip Select low */
+	SPI_FLASH_CS_LOW();
+	/* Send Block Erase instruction */
+	SPI_FLASH_SendByte(W25X_BlockErase);
+	/* Send BlockAddr high nibble address byte */
+	SPI_FLASH_SendByte((BlockAddr & 0xFF0000) >> 16);
+	/* Send BlockAddr medium nibble address byte */
+	SPI_FLASH_SendByte((BlockAddr & 0xFF00) >> 8);
+	/* Send BlockAddr low nibble address byte */
+	SPI_FLASH_SendByte(BlockAddr & 0xFF);
+	/* Deselect the FLASH: Chip Select high */
+	SPI_FLASH_CS_HIGH();
+	/* Wait the end of Flash writing */
+	SPI_FLASH_WaitForWriteEnd();
 }
 
 /*******************************************************************************
@@ -165,19 +165,19 @@ void SPI_FLASH_BlockErase(u32 BlockAddr)
 *******************************************************************************/
 void SPI_FLASH_ChipErase(void)
 {
-  /* Send write enable instruction */
-  SPI_FLASH_WriteEnable();
+	/* Send write enable instruction */
+	SPI_FLASH_WriteEnable();
 
-  /* Bulk Erase */
-  /* Select the FLASH: Chip Select low */
-  SPI_FLASH_CS_LOW();
-  /* Send Bulk Erase instruction  */
-  SPI_FLASH_SendByte(W25X_ChipErase);
-  /* Deselect the FLASH: Chip Select high */
-  SPI_FLASH_CS_HIGH();
+	/* Bulk Erase */
+	/* Select the FLASH: Chip Select low */
+	SPI_FLASH_CS_LOW();
+	/* Send Bulk Erase instruction  */
+	SPI_FLASH_SendByte(W25X_ChipErase);
+	/* Deselect the FLASH: Chip Select high */
+	SPI_FLASH_CS_HIGH();
 
-  /* Wait the end of Flash writing */
-  SPI_FLASH_WaitForWriteEnd();
+	/* Wait the end of Flash writing */
+	SPI_FLASH_WaitForWriteEnd();
 }
 
 /*******************************************************************************
@@ -195,41 +195,41 @@ void SPI_FLASH_ChipErase(void)
 *******************************************************************************/
 void SPI_FLASH_PageWrite(u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite)
 {
-  WriteAddr = WriteAddr <<8;	
-  /* Enable the write access to the FLASH */
-  SPI_FLASH_WriteEnable();
+//	WriteAddr = WriteAddr <<8;
+	/* Enable the write access to the FLASH */
+	SPI_FLASH_WriteEnable();
 
-  /* Select the FLASH: Chip Select low */
-  SPI_FLASH_CS_LOW();
-  /* Send "Write to Memory " instruction */
-  SPI_FLASH_SendByte(W25X_PageProgram);
-  /* Send WriteAddr high nibble address byte to write to */
-  SPI_FLASH_SendByte((WriteAddr & 0xFF0000) >> 16);
-  /* Send WriteAddr medium nibble address byte to write to */
-  SPI_FLASH_SendByte((WriteAddr & 0xFF00) >> 8);
-  /* Send WriteAddr low nibble address byte to write to */
-  SPI_FLASH_SendByte(WriteAddr & 0xFF);
+	/* Select the FLASH: Chip Select low */
+	SPI_FLASH_CS_LOW();
+	/* Send "Write to Memory " instruction */
+	SPI_FLASH_SendByte(W25X_PageProgram);
+	/* Send WriteAddr high nibble address byte to write to */
+	SPI_FLASH_SendByte((WriteAddr & 0xFF0000) >> 16);
+	/* Send WriteAddr medium nibble address byte to write to */
+	SPI_FLASH_SendByte((WriteAddr & 0xFF00) >> 8);
+	/* Send WriteAddr low nibble address byte to write to */
+	SPI_FLASH_SendByte(WriteAddr & 0xFF);
 
-  if(NumByteToWrite > SPI_FLASH_PerWritePageSize)
-  {
-     NumByteToWrite = SPI_FLASH_PerWritePageSize;
-     //printf("\n\r Err: SPI_FLASH_PageWrite too large!");
-  }
+	if(NumByteToWrite > SPI_FLASH_PerWritePageSize)
+	{
+		NumByteToWrite = SPI_FLASH_PerWritePageSize;
+	  //printf("\n\r Err: SPI_FLASH_PageWrite too large!");
+	}
 
-  /* while there is data to be written on the FLASH */
-  while (NumByteToWrite--)
-  {
-    /* Send the current byte */
-    SPI_FLASH_SendByte(*pBuffer);
-    /* Point on the next byte to be written */
-    pBuffer++;
-  }
+	/* while there is data to be written on the FLASH */
+	while (NumByteToWrite--)
+	{
+		/* Send the current byte */
+		SPI_FLASH_SendByte(*pBuffer);
+		/* Point on the next byte to be written */
+		pBuffer++;
+	}
 
-  /* Deselect the FLASH: Chip Select high */
-  SPI_FLASH_CS_HIGH();
+	/* Deselect the FLASH: Chip Select high */
+	SPI_FLASH_CS_HIGH();
 
-  /* Wait the end of Flash writing */
-  SPI_FLASH_WaitForWriteEnd();
+	/* Wait the end of Flash writing */
+	SPI_FLASH_WaitForWriteEnd();
 }
 
 /*******************************************************************************
@@ -326,7 +326,7 @@ void SPI_FLASH_BufferWrite(u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite)
 *******************************************************************************/
 void SPI_FLASH_BufferRead(u8* pBuffer, u32 ReadAddr, u16 NumByteToRead)
 {
-  ReadAddr = ReadAddr <<8;
+//  ReadAddr = ReadAddr <<8;
   /* Select the FLASH: Chip Select low */
   SPI_FLASH_CS_LOW();
 
