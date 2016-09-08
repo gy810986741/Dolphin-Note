@@ -62,7 +62,7 @@ unsigned char F_key_state = 0x00;
 unsigned char F_key_state_pre = 0x00;
 unsigned int F_key_longpush = 0;
 //unsigned char KEY_STATE_ = 0x00;
-
+unsigned char buffertowrite[200] = {0};
 ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t led_stack[ 512 ];
 static struct rt_thread led_thread;
@@ -94,13 +94,25 @@ static rt_uint8_t cc3200_stack[ 2048 ];
 static struct rt_thread cc3200_thread;
 static void cc3200_thread_entry(void* parameter)
 {
+	unsigned char wifi_data_seqout[256] = {0};
+	unsigned char wifi_data_seqlen = 0;
 	static unsigned char Main_Fuction_state = 0;
 	rt_sem_init(&Net_complete_seqSem , "netseqSem", 0, RT_IPC_FLAG_FIFO);//初始化信号量，初始值为1，该信号量会被第一个持有的线程清除
 	cc3200_init();
 	cc3200_get_MAC(MAC_BUF, Bar_code);
-//	SPI_FLASH_Init();
-//	SPI_FLASH_ChipErase();
-//	ScreenRecSeqInit();
+	SPI_FLASH_Init();
+	SPI_FLASH_ChipErase();
+////	rt_thread_delay(1000);
+//	for(unsigned char jj = 0; jj < 200 ;jj ++)
+//	{
+//		buffertowrite[jj] = jj;
+//	}
+//	SPI_FLASH_BufferWrite(buffertowrite, 50, 200);
+////	SPI_FLASH_ChipErase();
+////	rt_thread_delay(1000);
+//	SPI_FLASH_BufferRead(wifi_data_seqout, 0, 200);
+	ScreenRecSeqInit();
+	uart1_init(115200);//////////////////////////////////
 	while(1)
 	{
 		switch(Main_Fuction_state)
@@ -154,6 +166,12 @@ static void cc3200_thread_entry(void* parameter)
 						pen_data_ready = 0;
 						if(up_down_flag)
 						{
+//							if(ScreenRecSeqOut(wifi_data_seqout, point_cnt * 12))
+//							{
+//								wifi_send_pen_data(wifi_data_seqout, point_cnt);
+//								Uart2_Put_Buf(wifi_data_to_send , 9 + (point_cnt * 12));
+//						//		BEEP_STAT_Flag = 1;
+//							}
 							Uart2_Put_Buf(wifi_data_to_send , 9 + (wifi_data_len * 12));
 						}
 					}
@@ -219,136 +237,20 @@ static void cc3200_thread_entry(void* parameter)
 					
 				}
 				break;
-			default :
+			default:
 				break;
 		}
 		rt_thread_delay(1);
 	}
-//	while(cc3200_get_staip(Board_IP))
-//	{
-//		rt_thread_delay(1);
-//	}	
-//	while(1)
-//	{
-//		if(net_reset_flag == 1)
-//		{
-//			net_reset_flag = 0;
-//			wifi_reset();
-//			while(cc3200_get_staip(Board_IP))
-//			{
-//				rt_thread_delay(1);
-//			}	
-//		}
-//		cc3200_socket();
-
-//		while(1)
-//		{
-//			//第一次网络配置完成后跳出该循环
-//			if(net_complete_flag == 1)
-//			{
-//				Uart2_Put_Buf(wifi_data_to_send , 17);
-//				break;
-//			}
-//			rt_thread_delay(1);
-//		}
-//		ledseq_run(LED_RED, seq_error);
-//		ledseq_run(LED_SNP, seq_power_on);
-//		ledseq_run(LED_REC, seq_power_on);
-//		ledseq_run(BEEP, seq_testPassed);
-//		rt_sem_release(&Net_complete_seqSem);
-//		while(1)
-//		{		
-//			if(net_complete_flag == 1)
-//			{
-//				if(pen_data_ready)
-//				{
-//					pen_data_ready = 0;
-//					if(up_down_flag)
-//					{
-//						Uart2_Put_Buf(wifi_data_to_send , 9 + (wifi_data_len * 12));
-//					}
-//				}
-//				if(is_idle_flag)
-//				{
-//					is_idle_flag = 0;
-//					heart_beat_lose_cnt = 0;
-//					Uart2_Put_Buf(wifi_data_to_send , 11);
-//				}
-//				if((F_key_state & KEY_net_long_push) == KEY_net_long_push)//NET键长按三秒，发起断开连接请求
-//				{
-//					F_key_state = F_key_state & (KEY_net_long_push ^ 0x00);
-//					wifi_ack_send(0xA1, 0x0000);
-//					Uart2_Put_Buf(wifi_data_to_send , 11);
-//				}
-//				if((F_key_state & KEY_snp_short_push) == KEY_snp_short_push)//SNP键短按，发起截屏请求
-//				{
-//					F_key_state = F_key_state & (KEY_snp_short_push ^ 0x00);
-//					ledseq_run(LED_SNP, seq_flash_3_times);
-//					wifi_ack_send(0x70, 0x0000);
-//					Uart2_Put_Buf(wifi_data_to_send , 11);
-//				}
-//				if(meeting_end_flag)//接收到会议结束指令，收到手机确认信息后断开网络
-//				{
-//					meeting_end_flag = 0;
-//					net_complete_flag = 0;
-//					Phone_IP[0] = 0;
-//					Phone_IP[1] = 0;
-//					Phone_IP[2] = 0;
-//					Phone_IP[3] = 0;
-//					ledseq_stop(LED_NET, seq_power_on);
-//					ledseq_run(LED_NET, seq_alive);
-//					break;
-//				}
-//			}
-//			else if(net_complete_flag == 0)
-//			{//断网后，进入连接响应程序，此时需要判断请求连接的白板ID-->手机ID-->判断IP是否改变-->是否需要重新配置UDPC
-//				
-//				ledseq_stop(LED_NET, seq_power_on);
-//				ledseq_run(LED_NET, seq_alive);
-//				cc3200_reconnect();
-//				ledseq_stop(LED_NET, seq_alive);
-//				ledseq_run(LED_NET, seq_power_on);
-//				Uart2_Put_Buf(wifi_data_to_send , 17);
-//			}
-//			else if(net_complete_flag == 2)
-//			{
-//				
-//			}
-//			rt_thread_delay(1);
-//		}
-//	}
-}
-
-ALIGN(RT_ALIGN_SIZE)
-static rt_uint8_t Screen_stack[ 1024 ];
-static struct rt_thread Screen_thread;
-static void Screen_thread_entry(void* parameter)
-{
-//	rt_sem_take(&Net_complete_seqSem, RT_WAITING_FOREVER);
-	uart1_init(115200);
-//	SPI_FLASH_Init();
-//	SPI_FLASH_ChipErase();
-//	ScreenRecSeqInit();
-	while(1)
-	{
-//		time_base ++;
-		rt_thread_delay(10);
-	}
 }
 ALIGN(RT_ALIGN_SIZE)
-static rt_uint8_t Key_stack[ 512 ];
+static rt_uint8_t Key_stack[ 256 ];
 static struct rt_thread Key_thread;
 
 static void Key_thread_entry(void* parameter)
 {
-//	unsigned char F_key_state = 0x00;
-//	unsigned int key_time = 0;
 	static unsigned char key_lock_flag = 1;
 	key_init();
-
-//	bsp_InitLed();
-//	bsp_InitKey();
-//    
 	while(1)
 	{
 //		F_key_state = key_scan();
@@ -398,30 +300,10 @@ static void Key_thread_entry(void* parameter)
 				break;
 			default:
 				key_lock_flag = 0;
-				//F_key_longpush = 0;
 				break;
 		}
-//		/* ???? */
-//		bsp_KeyScan();
-//        /* LED?? */
-//        bsp_LedScan();
-        
-//        rt_thread_delay(10);
 	}
 }
-
-//ALIGN(RT_ALIGN_SIZE)
-//static rt_uint8_t Screen_stack[ 512 ];
-//static struct rt_thread Screen_thread;
-//static void Screen_thread_entry(void* parameter)
-//{
-//	uart1_init(115200);
-//	while(1)
-//	{
-//		time_base ++;
-//			rt_thread_delay(10);
-//	}
-//}
 
 void rt_init_thread_entry(void* parameter)
 {
@@ -462,12 +344,12 @@ int rt_application_init(void)
         rt_thread_startup(&cc3200_thread);
     }
 		
-		/* init screen thread */
-    result = rt_thread_init(&Screen_thread, "Screen", Screen_thread_entry, RT_NULL, (rt_uint8_t*)&Screen_stack[0], sizeof(Screen_stack), 18, 5);
-    if (result == RT_EOK)
-    {
-        rt_thread_startup(&Screen_thread);
-    }
+//		/* init screen thread */
+//    result = rt_thread_init(&Screen_thread, "Screen", Screen_thread_entry, RT_NULL, (rt_uint8_t*)&Screen_stack[0], sizeof(Screen_stack), 18, 5);
+//    if (result == RT_EOK)
+//    {
+//        rt_thread_startup(&Screen_thread);
+//    }
 
 #if (RT_THREAD_PRIORITY_MAX == 32)
     init_thread = rt_thread_create("init", rt_init_thread_entry, RT_NULL, 2048, 8, 20);
