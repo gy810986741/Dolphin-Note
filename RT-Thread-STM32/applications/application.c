@@ -58,11 +58,14 @@
 #define KEY_snp_short_push 0x20
 //#define key_net_long_push 0x1
 
+unsigned char breakpoint = 0;
+
 unsigned char F_key_state = 0x00;
 unsigned char F_key_state_pre = 0x00;
 unsigned int F_key_longpush = 0;
 //unsigned char KEY_STATE_ = 0x00;
-unsigned char buffertowrite[200] = {0};
+unsigned char buffertowrite[12] = {0,1,2,3,4,5,6,7,8,9,10,11};
+static unsigned char data_ready_to_store = 0;
 ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t led_stack[ 512 ];
 static struct rt_thread led_thread;
@@ -90,7 +93,7 @@ static void led_thread_entry(void* parameter)
 }
 
 ALIGN(RT_ALIGN_SIZE)
-static rt_uint8_t cc3200_stack[ 2048 ];
+static rt_uint8_t cc3200_stack[ 4096 ];
 static struct rt_thread cc3200_thread;
 static void cc3200_thread_entry(void* parameter)
 {
@@ -102,15 +105,7 @@ static void cc3200_thread_entry(void* parameter)
 	cc3200_get_MAC(MAC_BUF, Bar_code);
 	SPI_FLASH_Init();
 	SPI_FLASH_ChipErase();
-////	rt_thread_delay(1000);
-//	for(unsigned char jj = 0; jj < 200 ;jj ++)
-//	{
-//		buffertowrite[jj] = jj;
-//	}
-//	SPI_FLASH_BufferWrite(buffertowrite, 50, 200);
-////	SPI_FLASH_ChipErase();
-////	rt_thread_delay(1000);
-//	SPI_FLASH_BufferRead(wifi_data_seqout, 0, 200);
+
 	ScreenRecSeqInit();
 	uart1_init(115200);//////////////////////////////////
 	while(1)
@@ -154,7 +149,7 @@ static void cc3200_thread_entry(void* parameter)
 					//ledseq_run(LED_RED, seq_error);
 					ledseq_run(LED_SNP, seq_power_on);
 					ledseq_run(LED_REC, seq_power_on);
-					ledseq_run(BEEP, seq_testPassed);
+//					ledseq_run(BEEP, seq_testPassed);
 					rt_sem_release(&Net_complete_seqSem);
 				}
 				break;
@@ -166,20 +161,35 @@ static void cc3200_thread_entry(void* parameter)
 						pen_data_ready = 0;
 						if(up_down_flag)
 						{
+							data_ready_to_store = 1;
+							
 //							if(ScreenRecSeqOut(wifi_data_seqout, point_cnt * 12))
 //							{
 //								wifi_send_pen_data(wifi_data_seqout, point_cnt);
 //								Uart2_Put_Buf(wifi_data_to_send , 9 + (point_cnt * 12));
-//						//		BEEP_STAT_Flag = 1;
 //							}
 							Uart2_Put_Buf(wifi_data_to_send , 9 + (wifi_data_len * 12));
+//							ScreenRecSeqIn(pen_data, point_cnt * 12);//入队列
 						}
 					}
+//					else if(DataFrame_in_Flash / 0x0C)//如果在正常连接的时候，缓存区内有数据，那么在空闲的时候发送，直至发完为止
+//					{							//这里最好一次只发一个点的数据
+//						
+//						DataFrame_in_Flash -= 0x0C;
+//						
+//						if(ScreenRecSeqOut(wifi_data_seqout, 1))
+//						{
+//							wifi_send_pen_data(wifi_data_seqout, 1);
+//							Uart2_Put_Buf(wifi_data_to_send , 9 + 12);
+//						}
+//					}
 					if(is_idle_flag)
 					{
 						is_idle_flag = 0;
 						heart_beat_lose_cnt = 0;
 						Uart2_Put_Buf(wifi_data_to_send , 11);
+						FlashScreenDataSeq.SeqReadAddr = FlashScreenDataSeq.SeqFrontAddr;
+						FlashScreenDataSeq.SeqRearAddr = FlashScreenDataSeq.SeqReadAddr;			//将计数器清零
 					}
 					if((F_key_state & KEY_net_long_push) == KEY_net_long_push)//NET键长按三秒，发起断开连接请求
 					{
@@ -231,11 +241,23 @@ static void cc3200_thread_entry(void* parameter)
 					ledseq_stop(LED_NET, seq_alive);
 					ledseq_run(LED_NET, seq_alwayson);
 					Uart2_Put_Buf(wifi_data_to_send , 17);
-				}
-				else if(net_complete_flag == 2)
-				{
 					
+					while(((DataFrame_in_Flash / 0x0C) > 0)&&(DataFrame_in_Flash % 0x0C == 0))//如果在正常连接的时候，缓存区内有数据，那么在空闲的时候发送，直至发完为止
+					{							//这里最好一次只发一个点的数据
+						DataFrame_in_Flash -= 0x0C;
+						
+						if(ScreenRecSeqOut(wifi_data_seqout, 12))
+						{
+							wifi_send_pen_data(wifi_data_seqout, 1);
+							Uart2_Put_Buf(wifi_data_to_send , 9 + 12);
+						}
+						rt_thread_delay(10);//延时防止操作flash的时候整个系统被阻塞掉
+					}	
 				}
+//				else if(net_complete_flag == 2)
+//				{
+//					
+//				}
 				break;
 			default:
 				break;
@@ -304,7 +326,22 @@ static void Key_thread_entry(void* parameter)
 		}
 	}
 }
+//ALIGN(RT_ALIGN_SIZE)
+//static rt_uint8_t Data_stack[ 256 ];
+//static struct rt_thread Data_thread;
 
+//static void Data_thread_entry(void* parameter)
+//{
+//	while(1)
+//	{
+//		if(data_ready_to_store)
+//		{
+//			data_ready_to_store = 0;
+//			ScreenRecSeqIn(buffertowrite, 1);//入队列
+//		}
+//		rt_thread_delay(10);
+//	}
+//}
 void rt_init_thread_entry(void* parameter)
 {
 #ifdef RT_USING_COMPONENTS_INIT
@@ -343,7 +380,11 @@ int rt_application_init(void)
     {
         rt_thread_startup(&cc3200_thread);
     }
-		
+//    result = rt_thread_init(&Data_thread, "Data", Data_thread_entry, RT_NULL, (rt_uint8_t*)&Data_stack[0], sizeof(Data_stack), 20, 5);
+//    if (result == RT_EOK)
+//    {
+//        rt_thread_startup(&Data_thread);
+//    }		
 //		/* init screen thread */
 //    result = rt_thread_init(&Screen_thread, "Screen", Screen_thread_entry, RT_NULL, (rt_uint8_t*)&Screen_stack[0], sizeof(Screen_stack), 18, 5);
 //    if (result == RT_EOK)
