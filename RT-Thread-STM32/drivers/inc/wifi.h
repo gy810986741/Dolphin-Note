@@ -31,7 +31,7 @@
 #define camera 0xA0
 #define camera 0xA0
 
-extern unsigned char wifi_data_to_send[255];
+extern unsigned char wifi_data_to_send[256];
 extern unsigned char Phone_ID[16];
 extern unsigned char Board_ID[2];
 extern unsigned char Phone_IP[4];

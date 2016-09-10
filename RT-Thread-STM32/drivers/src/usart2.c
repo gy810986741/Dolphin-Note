@@ -94,7 +94,7 @@ void uart1_init(u32 bound)
 }
 
 unsigned char Screen_TxBuffer[50] = {0};
-unsigned char Screen_RxBuffer[255] = {0};
+unsigned char Screen_RxBuffer[256] = {0};
 //unsigned int i = 0;
 unsigned char count_1 = 0;
 unsigned char TxCounter_1 = 0;
@@ -194,7 +194,7 @@ void USART1_IRQHandler(void)                	//串口1中断服务程序
 
 
 unsigned char WIFI_TxBuffer[256] = {0};
-unsigned char WIFI_RxBuffer[50] = {0};
+unsigned char WIFI_RxBuffer[256] = {0};//原来的数组长度过小，会导致溢出
 //unsigned char WIFI_RxBuffer2[39] = {0};
 unsigned char count_2 = 0;
 unsigned char TxCounter_2 = 0;
@@ -211,8 +211,9 @@ void USART2_IRQHandler(void)
 {
 	/* enter interrupt */
     rt_interrupt_enter();
+	static  unsigned char 	err_cnt = 0;
 			unsigned char 	ResData;//接收到的一个字节
-	static 	unsigned int	Data_Len = 0,//数据长度
+	static 	unsigned char	Data_Len = 0,//数据长度
 							Data_Count = 0;//数据长度计数
 	static 	unsigned char	RxState = 0;//接收数据状态计数   用于切换状态
 	static	unsigned char	ID_cnt = 0;
@@ -228,7 +229,7 @@ void USART2_IRQHandler(void)
 		case 0:
 				if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)//接收到数据
 				{	 
-					res =USART_ReceiveData(USART2);		 
+					res = USART_ReceiveData(USART2);		 
 					if((USART2_RX_STA&(1<<15))==0)//接收完的一批数据,还没有被处理,则不再接收其他数据
 					{ 
 						if(USART2_RX_STA<USART2_MAX_RECV_LEN)	//还可以接收数据
@@ -334,10 +335,15 @@ void USART2_IRQHandler(void)
 									break;
 								}
 							}
-//							else if(Data_Len == 0)
-//							{
-//								RxState = 0;
-//							}
+							else//这里为了防止卡在case 5 
+							{
+								err_cnt ++;
+								if(err_cnt > 1)
+								{
+									err_cnt = 0;
+									RxState = 0;
+								}
+							}
 						break;
 						case 6:
 							WIFI_RxBuffer[7 + Data_Count ++] = ResData;

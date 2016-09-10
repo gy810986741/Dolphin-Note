@@ -74,7 +74,7 @@ void rtthread_startup(void)
     /* init memory system */
     rt_system_heap_init((void*)&__bss_end, (void*)STM32_SRAM_END);
 #endif
-#endif  /* STM32_EXT_SRAM */
+#endif /* STM32_EXT_SRAM */
 #endif /* RT_USING_HEAP */
 
     /* init scheduler system */

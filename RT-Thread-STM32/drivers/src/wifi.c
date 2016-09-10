@@ -11,7 +11,7 @@
 #define BYTE2(dwTemp)       (*((char *)(&dwTemp) + 2))
 #define BYTE3(dwTemp)       (*((char *)(&dwTemp) + 3))
 	
-unsigned char wifi_data_to_send[255] = {0};
+unsigned char wifi_data_to_send[256] = {0};
 unsigned char Phone_ID[16] = {0};
 unsigned char BroadcastPhone_ID[16] = {0};
 unsigned char Board_ID[2] = {0};
@@ -192,7 +192,7 @@ void wifi_ack_send(unsigned char code, unsigned short para) //发送应答信息指令0x
 		case 0x74:
 			wifi_data_to_send[5] = 0x04;
 			wifi_data_to_send[6] = 0x00;
-	
+
 			wifi_data_to_send[7] = 0;
 			wifi_data_to_send[8] = 0;
 			wifi_data_to_send[9] = 0;
@@ -215,7 +215,7 @@ void wifi_ack_send(unsigned char code, unsigned short para) //发送应答信息指令0x
 void wifi_data_deal(unsigned char *data_buf, unsigned char num)
 {
 	
-	vs16 rc_value_temp;
+//	vs16 rc_value_temp;
 	unsigned char sum = 0;
 	unsigned char i = 0;
 	unsigned char Bar_code_err_flag = 0;
@@ -325,7 +325,8 @@ void wifi_data_deal(unsigned char *data_buf, unsigned char num)
 		case 0xA9://心跳包
 			wifi_ack_send(0x77, 0);
 			is_idle_flag = 1;
-			FlashScreenDataSeq.SeqRearAddr = FlashScreenDataSeq.SeqReadAddr ;			//将计数器清零
+//			FlashScreenDataSeq.SeqReadAddr = FlashScreenDataSeq.SeqFrontAddr;
+//			FlashScreenDataSeq.SeqRearAddr = FlashScreenDataSeq.SeqReadAddr;			//将计数器清零
 			break;
 		case 0xA1:{//接到手机发送的会议结束指令
 			meeting_end_flag = 1;

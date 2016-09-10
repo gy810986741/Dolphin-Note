@@ -24,7 +24,7 @@ unsigned char is_idle_flag = 0;
 unsigned char meeting_end_flag = 0;
 unsigned char time_checking_flag = 0;
 unsigned char searching_flag = 0;
-unsigned char pen_data[100] = {0};//±Ê¼£Êı¾İ
+unsigned char pen_data[256] = {0};//±Ê¼£Êı¾İ
 unsigned char point_cnt = 0;//´¥Ãşµã¼ÆÊı
 void Screen_data_analize(unsigned char *data_buf,unsigned char num)//´¥ÆÁĞ­Òé´¦Àí
 {
@@ -83,7 +83,7 @@ void Screen_data_analize(unsigned char *data_buf,unsigned char num)//´¥ÆÁĞ­Òé´¦À
 			break;
 		case 0x60:
 			up_down_flag = 0;
-			for(i = 0; i < 100; i++)
+			for(i = 0; i < 200; i++)
 			{
 				pen_data[i] = 0;
 			}
@@ -103,9 +103,19 @@ void ScreenRecSeqInit()
 //Èë¿Ú²ÎÊı£ºunsigned char *_DataFrame ´ıĞ´ÈëµÄÊı×é
 //			unsigned char _DataLen	  ´ıĞ´ÈëµÄ±Ê¼£Êı¾İµãÊı¼ÆÊı
 //·µ»Ø    £ºstate £ºError ¶ÓÁĞÂú  ok Ğ´Èë³É¹¦
+//unsigned char breakpoint = 0;
+void delay_ms(u16 time)
+{    
+	u16 i=0;  
+	while(time--)
+	{
+		i=12000;  //????
+		while(i--) ;    
+	}
+}
 State_typedef ScreenRecSeqIn(unsigned char *_DataFrame, unsigned char _DataLen)
 {
-	DisableIRP();
+//	DisableIRP();
 	if(((FlashScreenDataSeq.SeqFrontAddr + _DataLen * Pendata_frame_len) & 0x200000) &&
 		/*(FlashScreenDataSeq.SeqFrontAddr >= FlashScreenDataSeq.SeqRearAddr) || *///Í·ÔÚÎ²Ç°
 //		((FlashScreenDataSeq.SeqFrontAddr < FlashScreenDataSeq.SeqRearAddr)&&//Í·»¹Î´×·ÉÏÎ²
@@ -115,13 +125,14 @@ State_typedef ScreenRecSeqIn(unsigned char *_DataFrame, unsigned char _DataLen)
 //		ledseq_run(BEEP, seq_armed);
 //		BEEP_STAT_Flag = 3;//»º´æÂú ·äÃùÆ÷ÏìÈıÉù
 //		ERR_Status = 0xE1;//ÔÚĞÄÌø°üÖĞ¼ÓÈë»º´æÂú±êÖ¾
-		EnableIRP();
+//		EnableIRP();
 		//TUDO::ÅĞ¶Ï»º³åÇøÇé¿ö
     	return Error;
 	}
 	else
 	{
 //		DisableIRP();
+//		delay_ms(20);
 		SPI_FLASH_BufferWrite(_DataFrame, FlashScreenDataSeq.SeqFrontAddr, _DataLen * Pendata_frame_len);//Ğ´ÈëÒ»Ö¡Êı¾İ
 //		EnableIRP();
 		FlashScreenDataSeq.SeqFrontAddr = ((FlashScreenDataSeq.SeqFrontAddr + _DataLen * Pendata_frame_len) & 0x1FFFFF);
@@ -136,13 +147,15 @@ State_typedef ScreenRecSeqIn(unsigned char *_DataFrame, unsigned char _DataLen)
 //			ledseq_run(BEEP, seq_flash_60_waring);
 //			BEEP_STAT_Flag = 2;
 //		}
+
 //		else if(DataFrame_in_Flash > 1677720)//»º´æÂú60% ·äÃùÆ÷ÏìÒ»Éù
 //		{
 //			ledseq_run(BEEP, seq_flash_80_waring);
 //			BEEP_STAT_Flag = 1;
 //		}
-	}	
-	EnableIRP();
+	}
+
+//	EnableIRP();
 	return Ok;
 } 									 
 /*½ÓÊÕ¶ÓÁĞ³ö¶ÓÁĞ£¬Èç¹û¶ÓÁĞÎª¿ÕµÄ»°Ôò·µ»ØError*/

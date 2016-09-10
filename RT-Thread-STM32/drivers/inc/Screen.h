@@ -35,9 +35,13 @@ typedef struct
 //	unsigned int			addr;//存入FLASH中的数据地址指针
 //	unsigned char			Seqlen;//队列深度
 //	SeqDataAddr_structdef	DataHead[Seqbufferlen];//数据长度
-	unsigned int 			SeqFrontAddr;//队列的顶部，进数据
-	unsigned int			SeqRearAddr;//队列的底部，出数据
-	unsigned int			SeqReadAddr;
+//volatile unsigned int	testa;
+//volatile unsigned int	testb;
+volatile unsigned int 			SeqFrontAddr;//队列的顶部，进数据
+volatile unsigned int			SeqRearAddr;//队列的底部，出数据
+volatile unsigned int			SeqReadAddr;
+//volatile unsigned int	testc;
+//volatile unsigned int	testd;
 }FlashSeq_structdef;
 extern FlashSeq_structdef FlashScreenDataSeq;
 extern unsigned int time_base;
@@ -51,6 +55,9 @@ extern unsigned char meeting_end_flag;
 extern unsigned char time_checking_flag;
 extern unsigned char searching_flag;
 extern unsigned char point_cnt;
+
+extern unsigned char pen_data[256];//笔迹数据
+
 void Screen_data_analize(unsigned char *data_buf,unsigned char num);
 void ScreenRecSeqInit(void);
 State_typedef ScreenRecSeqIn(unsigned char *_DataFrame, unsigned char _DataLen);
