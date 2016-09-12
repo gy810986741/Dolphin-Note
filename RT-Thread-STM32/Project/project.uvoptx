@@ -177,12 +177,50 @@
           <Name>-O14 -S0 -C0 -N00("ARM Cortex-M3") -D00(1BA00477) -L00(4) -FO7  -FN1 -FC1000 -FD20000000 -FF0STM32F10x_512 -FL080000 -FS08000000 -FP0($$Device:STM32F103RC$Flash\STM32F10x_512.FLM)</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint/>
+      <Breakpoint>
+        <Bp>
+          <Number>0</Number>
+          <Type>0</Type>
+          <LineNumber>327</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134240840</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>E:\璁捐\娴疯睔绗旇抗\Dolphin-Note\RT-Thread-STM32\libcpu\arm\cortex-m3\cpuport.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\project\../libcpu/arm/cortex-m3/cpuport.c\327</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>335</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134240856</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>E:\璁捐\娴疯睔绗旇抗\Dolphin-Note\RT-Thread-STM32\libcpu\arm\cortex-m3\cpuport.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\project\../libcpu/arm/cortex-m3/cpuport.c\335</Expression>
+        </Bp>
+      </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
           <ItemText>FlashScreenDataSeq</ItemText>
+        </Ww>
+        <Ww>
+          <count>1</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>DataFrame_in_Flash</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -201,7 +239,7 @@
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>0</SubType>
-          <ItemText>0x20002224</ItemText>
+          <ItemText>0x200021f0</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
