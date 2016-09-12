@@ -17,7 +17,7 @@ static void* timer_led[LED_NUM];//定义空地址指针，指向四个定时器句柄地址，节省空
 /* Led sequence priority */
 static ledseq_t * sequences[] = //LED闪烁序列定义
 {
-	seq_selftest,	//测试通过
+	seq_testPassed,	//测试通过
 	seq_lowbat,		//电量低
 	seq_power_on,	//充电完成
 	seq_flash_80_waring,	//充电中
@@ -78,6 +78,7 @@ ledseq_t seq_flash_3_times[] =
 	{    1, LEDSEQ_STOP},//最后一个状态在STOP的情况下会保持value的值
 };
 
+
 ledseq_t seq_power_on[] = 
 {
 	{ true, LEDSEQ_WAITMS(1000)},
@@ -100,11 +101,23 @@ ledseq_t seq_flash_60_waring[] =
 	{    0, LEDSEQ_STOP},
 };
 
-ledseq_t seq_selftest[] = 
+ledseq_t seq_testPassed[] = 
 {
-	{ true, LEDSEQ_WAITMS(500)},
-	{false, LEDSEQ_WAITMS(500)},
-	{false, LEDSEQ_LOOP},
+	{ true, LEDSEQ_WAITMS(50)},
+	{false, LEDSEQ_WAITMS(50)},
+	{ true, LEDSEQ_WAITMS(50)},
+	{false, LEDSEQ_WAITMS(50)},
+	{ true, LEDSEQ_WAITMS(50)},
+	{false, LEDSEQ_WAITMS(50)},
+	{ true, LEDSEQ_WAITMS(50)},
+	{false, LEDSEQ_WAITMS(50)},
+	{ true, LEDSEQ_WAITMS(50)},
+	{false, LEDSEQ_WAITMS(50)},
+	{ true, LEDSEQ_WAITMS(50)},
+	{false, LEDSEQ_WAITMS(50)},
+	{ true, LEDSEQ_WAITMS(50)},
+	{false, LEDSEQ_WAITMS(50)},
+	{false, LEDSEQ_STOP},
 };
 
 /* LED序列处理机制 */

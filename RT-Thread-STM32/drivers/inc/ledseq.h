@@ -40,7 +40,7 @@ extern ledseq_t seq_flash_3_times[];
 extern ledseq_t seq_power_on[];
 extern ledseq_t seq_flash_80_waring[];
 extern ledseq_t seq_flash_60_waring[];
-extern ledseq_t seq_selftest[];
+extern ledseq_t seq_testPassed[];
 
 #endif
 
