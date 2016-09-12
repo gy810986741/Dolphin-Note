@@ -78,15 +78,16 @@ void Screen_data_analize(unsigned char *data_buf,unsigned char num)//´¥ÆÁĞ­Òé´¦À
 				pen_data[i*Pendata_frame_len +11] =(time_base & 0xff0000) >> 16;
 			}
 			ScreenRecSeqIn(pen_data, point_cnt);//Èë¶ÓÁĞ
-			pen_data_ready = 1;
 			wifi_send_pen_data(pen_data, point_cnt);
+			pen_data_ready = 1;
+			
 			break;
 		case 0x60:
 			up_down_flag = 0;
-			for(i = 0; i < 200; i++)
-			{
-				pen_data[i] = 0;
-			}
+//			for(i = 0; i < 200; i++)
+//			{
+//				pen_data[i] = 0;
+//			}
 			break;
 	}
 }
