@@ -101,7 +101,7 @@ static struct rt_thread cc3200_thread;
 static void cc3200_thread_entry(void* parameter)
 {
 	unsigned char wifi_data_seqout[256] = {0};
-	unsigned char wifi_data_seqlen = 0;
+//	unsigned char wifi_data_seqlen = 0;
 	static unsigned char Main_Fuction_state = 0;
 	rt_sem_init(&Net_complete_seqSem , "netseqSem", 0, RT_IPC_FLAG_FIFO);//初始化信号量，初始值为1，该信号量会被第一个持有的线程清除
 	cc3200_init();
@@ -136,7 +136,7 @@ static void cc3200_thread_entry(void* parameter)
 					ledseq_stop(LED_NET, seq_alive);
 					wifi_reset();
 					Main_Fuction_state = 0;
-				}	
+				}
 				if(searching_flag == 1)
 				{
 					searching_flag = 0;
@@ -313,10 +313,10 @@ static void Key_thread_entry(void* parameter)
 	}
 }
 ALIGN(RT_ALIGN_SIZE)
-static rt_uint8_t Data_stack[ 512 ];
-static struct rt_thread Data_thread;
+static rt_uint8_t Heart_stack[ 512 ];
+static struct rt_thread Heart_thread;
 
-static void Data_thread_entry(void* parameter)
+static void Heart_thread_entry(void* parameter)
 {
 	while(1)
 	{
@@ -337,6 +337,19 @@ static void Data_thread_entry(void* parameter)
 		rt_thread_delay(1);
 	}
 }
+
+ALIGN(RT_ALIGN_SIZE)
+static rt_uint8_t Data_stack[ 512 ];
+static struct rt_thread Data_thread;
+
+static void Data_thread_entry(void* parameter)
+{
+	while(1)
+	{
+		rt_thread_delay(1);
+	}
+}
+
 void rt_init_thread_entry(void* parameter)
 {
 #ifdef RT_USING_COMPONENTS_INIT
@@ -362,30 +375,29 @@ int rt_application_init(void)
     {
         rt_thread_startup(&led_thread);
     }
-		
-    	/* init key thread */
+	/* init key thread */
     result = rt_thread_init(&Key_thread, "Key", Key_thread_entry, RT_NULL, (rt_uint8_t*)&Key_stack[0], sizeof(Key_stack), 17, 5);
     if (result == RT_EOK)
     {
         rt_thread_startup(&Key_thread);
     }
-		/* init cc3200 thread */
+	/* init cc3200 thread */
     result = rt_thread_init(&cc3200_thread, "cc3200", cc3200_thread_entry, RT_NULL, (rt_uint8_t*)&cc3200_stack[0], sizeof(cc3200_stack), 19, 5);
     if (result == RT_EOK)
     {
         rt_thread_startup(&cc3200_thread);
     }
-    result = rt_thread_init(&Data_thread, "Data", Data_thread_entry, RT_NULL, (rt_uint8_t*)&Data_stack[0], sizeof(Data_stack), 20, 5);
+    result = rt_thread_init(&Heart_thread, "Heart", Heart_thread_entry, RT_NULL, (rt_uint8_t*)&Heart_stack[0], sizeof(Heart_stack), 15, 5);
+    if (result == RT_EOK)
+    {
+        rt_thread_startup(&Heart_thread);
+    }		
+	/* init screen thread */
+    result = rt_thread_init(&Data_thread, "Data", Data_thread_entry, RT_NULL, (rt_uint8_t*)&Data_stack[0], sizeof(Data_stack), 16, 5);
     if (result == RT_EOK)
     {
         rt_thread_startup(&Data_thread);
-    }		
-//		/* init screen thread */
-//    result = rt_thread_init(&Screen_thread, "Screen", Screen_thread_entry, RT_NULL, (rt_uint8_t*)&Screen_stack[0], sizeof(Screen_stack), 18, 5);
-//    if (result == RT_EOK)
-//    {
-//        rt_thread_startup(&Screen_thread);
-//    }
+    }
 
 #if (RT_THREAD_PRIORITY_MAX == 32)
     init_thread = rt_thread_create("init", rt_init_thread_entry, RT_NULL, 2048, 8, 20);

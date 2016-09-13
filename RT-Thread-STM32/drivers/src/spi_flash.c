@@ -89,7 +89,7 @@ void SPI_FLASH_Init(void)
 	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
 	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
 	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
-	SPI_InitStructure.SPI_CRCPolynomial = 7;
+	SPI_InitStructure.SPI_CRCPolynomial = 1;
 	SPI_Init(SPI1, &SPI_InitStructure);
 
 	/* Enable SPI1  */
@@ -105,7 +105,7 @@ void SPI_FLASH_Init(void)
 *******************************************************************************/
 void SPI_FLASH_SectorErase(u32 SectorAddr)
 {
-	SectorAddr = SectorAddr << 12;
+//	SectorAddr = SectorAddr << 12;
 	/* Send write enable instruction */
 	SPI_FLASH_WriteEnable();
 	SPI_FLASH_WaitForWriteEnd();
@@ -135,7 +135,7 @@ void SPI_FLASH_SectorErase(u32 SectorAddr)
 *******************************************************************************/
 void SPI_FLASH_BlockErase(u32 BlockAddr)
 {
-	BlockAddr = BlockAddr << 16;
+//	BlockAddr = BlockAddr << 16;
 	/* Send write enable instruction */
 	SPI_FLASH_WriteEnable();
 	SPI_FLASH_WaitForWriteEnd();
@@ -466,17 +466,17 @@ u8 SPI_FLASH_ReadByte(void)
 *******************************************************************************/
 u8 SPI_FLASH_SendByte(u8 byte)
 {
-  /* Loop while DR register in not emplty */
-  while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET);
+	/* Loop while DR register in not emplty */
+	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET);
 
-  /* Send byte through the SPI1 peripheral */
-  SPI_I2S_SendData(SPI1, byte);
+	/* Send byte through the SPI1 peripheral */
+	SPI_I2S_SendData(SPI1, byte);
 
-  /* Wait to receive a byte */
-  while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
+	/* Wait to receive a byte */
+	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
 
-  /* Return the byte read from the SPI bus */
-  return SPI_I2S_ReceiveData(SPI1);
+	/* Return the byte read from the SPI bus */
+	return SPI_I2S_ReceiveData(SPI1);
 }
 
 /*******************************************************************************
@@ -546,6 +546,7 @@ void SPI_FLASH_WaitForWriteEnd(void)
     /* Send a dummy byte to generate the clock needed by the FLASH
     and put the value of the status register in FLASH_Status variable */
     FLASH_Status = SPI_FLASH_SendByte(Dummy_Byte);	 
+//	rt_thread_delay(1);
   }
   while ((FLASH_Status & WIP_Flag) == SET); /* Write in progress */
 

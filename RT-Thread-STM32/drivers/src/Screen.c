@@ -12,7 +12,10 @@
 #define DisableIRP()  __disable_irq()
 #define Pendata_frame_len	12
 //ScreenSeq_structdef ScreenDataSeq = {0};
-FlashSeq_structdef FlashScreenDataSeq = {0};
+
+BufferSeq_structdef	ScreenDataSeq = {0};
+FlashSeq_structdef 	FlashScreenDataSeq = {0};
+
 unsigned int DataFrame_in_Flash = 0;
 unsigned int time_base = 0;
 unsigned char up_down_flag = 0;
@@ -56,14 +59,14 @@ void Screen_data_analize(unsigned char *data_buf,unsigned char num)//¥•∆¡–≠“È¥¶¿
 			point_cnt = (*(data_buf + 1) - 2) / 10;
 			for(i = 0; i < point_cnt; i++)
 			{
-				pen_data[i*Pendata_frame_len + 0] =  *(data_buf + 5 + i*10);
-				pen_data[i*Pendata_frame_len + 1] =  *(data_buf + 6 + i*10);
-				pen_data[i*Pendata_frame_len + 2] =  *(data_buf + 7 + i*10);
-				pen_data[i*Pendata_frame_len + 3] =  *(data_buf + 8 + i*10);
-				pen_data[i*Pendata_frame_len + 4] =  *(data_buf + 9 + i*10);
-				pen_data[i*Pendata_frame_len + 5] =  *(data_buf +10 + i*10);
-				pen_data[i*Pendata_frame_len + 6] =  *(data_buf +11 + i*10);
-				pen_data[i*Pendata_frame_len + 7] =  *(data_buf +12 + i*10);
+				pen_data[i*Pendata_frame_len + 0] = *(data_buf + 5 + i*10);
+				pen_data[i*Pendata_frame_len + 1] = *(data_buf + 6 + i*10);
+				pen_data[i*Pendata_frame_len + 2] = *(data_buf + 7 + i*10);
+				pen_data[i*Pendata_frame_len + 3] = *(data_buf + 8 + i*10);
+				pen_data[i*Pendata_frame_len + 4] = *(data_buf + 9 + i*10);
+				pen_data[i*Pendata_frame_len + 5] = *(data_buf +10 + i*10);
+				pen_data[i*Pendata_frame_len + 6] = *(data_buf +11 + i*10);
+				pen_data[i*Pendata_frame_len + 7] = *(data_buf +12 + i*10);
 				if(*(data_buf + 3 + i*10 + 0) == 0x04)//± ◊¥Ã¨  Ãß∆ 0x04
 				{
 					pen_data[i*Pendata_frame_len + 8] = (*(data_buf + 4 + i*10 ) & 0x7f) | 0x80;
@@ -84,15 +87,18 @@ void Screen_data_analize(unsigned char *data_buf,unsigned char num)//¥•∆¡–≠“È¥¶¿
 			break;
 		case 0x60:
 			up_down_flag = 0;
-//			for(i = 0; i < 200; i++)
-//			{
-//				pen_data[i] = 0;
-//			}
 			break;
 	}
 }
 /*≥ı ºªØ ˝æ›¥Ê¥¢∂”¡–*/
 void ScreenRecSeqInit()
+{
+	FlashScreenDataSeq.SeqFrontAddr = 0;		//Œ™∂”¡–ÃÌº”ª∫¥Êµÿ÷∑
+	FlashScreenDataSeq.SeqRearAddr = 0;			//Ω´º∆ ˝∆˜«Â¡„
+	FlashScreenDataSeq.SeqReadAddr = 0;
+}
+/*≥ı ºªØ ˝æ›¥Ê¥¢∂”¡–*/
+void BufferRecSeqInit()
 {
 	FlashScreenDataSeq.SeqFrontAddr = 0;		//Œ™∂”¡–ÃÌº”ª∫¥Êµÿ÷∑
 	FlashScreenDataSeq.SeqRearAddr = 0;			//Ω´º∆ ˝∆˜«Â¡„
@@ -118,8 +124,6 @@ State_typedef ScreenRecSeqIn(unsigned char *_DataFrame, unsigned char _DataLen)
 {
 //	DisableIRP();
 	if(((FlashScreenDataSeq.SeqFrontAddr + _DataLen * Pendata_frame_len) & 0x200000) &&
-		/*(FlashScreenDataSeq.SeqFrontAddr >= FlashScreenDataSeq.SeqRearAddr) || *///Õ∑‘⁄Œ≤«∞
-//		((FlashScreenDataSeq.SeqFrontAddr < FlashScreenDataSeq.SeqRearAddr)&&//Õ∑ªπŒ¥◊∑…œŒ≤
 		(((FlashScreenDataSeq.SeqFrontAddr + _DataLen * Pendata_frame_len) & 0x1FFFFF) > FlashScreenDataSeq.SeqRearAddr))//œ¬“ª÷° ˝æ›»Áπ˚–¥»Î∫ÛÕ∑÷∏’Î «∑Òª·≥¨π˝Œ≤
 	{
 //		//ª∫¥Ê¬˙
@@ -132,10 +136,7 @@ State_typedef ScreenRecSeqIn(unsigned char *_DataFrame, unsigned char _DataLen)
 	}
 	else
 	{
-//		DisableIRP();
-//		delay_ms(20);
 		SPI_FLASH_BufferWrite(_DataFrame, FlashScreenDataSeq.SeqFrontAddr, _DataLen * Pendata_frame_len);//–¥»Î“ª÷° ˝æ›
-//		EnableIRP();
 		FlashScreenDataSeq.SeqFrontAddr = ((FlashScreenDataSeq.SeqFrontAddr + _DataLen * Pendata_frame_len) & 0x1FFFFF);
 		
 		/*º∆À„‘⁄ª∫≥Â«¯÷–µƒ ˝æ›◊‹ ˝*/
@@ -155,7 +156,6 @@ State_typedef ScreenRecSeqIn(unsigned char *_DataFrame, unsigned char _DataLen)
 //			BEEP_STAT_Flag = 1;
 //		}
 	}
-
 //	EnableIRP();
 	return Ok;
 } 									 
@@ -184,63 +184,37 @@ State_typedef ScreenRecSeqOut(unsigned char *_DataFrame, unsigned char _DataLen)
 		return Ok;
 	}
 }
-///*≥ı ºªØ ˝æ›¥Ê¥¢∂”¡–*/
-//void ScreenRecSeqInit()
-//{
-////	ScreenDataSeq.Datalen[] = 0;
-//	ScreenDataSeq.addr = 0;		//Œ™∂”¡–ÃÌº”ª∫¥Êµÿ÷∑
-//	ScreenDataSeq.SeqFront = 0;			//Ω´º∆ ˝∆˜«Â¡„
-//	ScreenDataSeq.SeqRear = 0;
-//}
-///*œÚΩ” ’∂”¡–∑≈»Î“ª÷° ˝æ›*/
-//State_typedef ScreenRecSeqIn(unsigned char *_DataFrame, unsigned char _DataLen)
-//{
-//	DisableIRP();
-//	if(((ScreenDataSeq.SeqFront + 1) % Seqbufferlen) == ScreenDataSeq.SeqRear)  //ª∫¥Ê¬˙ TUDO:: «∑Ò¥Ê¬˙£¨”–¡Ω÷÷«Èøˆ£¨µ⁄“ª÷÷ «∂”¡–¬˙£¨µ⁄∂˛÷÷ «¥Ê¥¢ø’º‰¬˙
-//	{
-//		EnableIRP();
-//		//TUDO::≈–∂œª∫≥Â«¯«Èøˆ
-//		return Error;
-//	}
-//	/*TUDO::∏√¥¶º”»Îflash¥Ê¥¢*/
-//	
-//	ScreenDataSeq.addr += _DataLen * 12;
-//	ScreenDataSeq.DataHead[ScreenDataSeq.SeqFront].DataLen = _DataLen * 12;
-//	ScreenDataSeq.DataHead[ScreenDataSeq.SeqFront].DataAddr = ScreenDataSeq.addr;
-//	
-////	SPI_FLASH_PageWrite(_DataFrame, ScreenDataSeq.DataHead[ScreenDataSeq.SeqFront].DataAddr, (_DataLen + 1) * 12);
-//	SPI_FLASH_BufferWrite(_DataFrame, ScreenDataSeq.DataHead[ScreenDataSeq.SeqFront].DataAddr, _DataLen * 12);
-//	
-//  	ScreenDataSeq.SeqFront = (ScreenDataSeq.SeqFront + 1) % Seqbufferlen;  //÷∏œÚ—≠ª∑0~£®Seqbufferlen - 1£©
-//	if(ScreenDataSeq.SeqFront == 0)
-//	{
-//		ScreenDataSeq.addr = 0;
-//	}
-//	EnableIRP();
-//  	return Ok; 
-//} 									 
-///*Ω” ’∂”¡–≥ˆ∂”¡–£¨»Áπ˚∂”¡–Œ™ø’µƒª∞‘Ú∑µªÿError*/
-//State_typedef ScreenRecSeqOut(unsigned char *_DataFrame, unsigned char *_DataLen)
-//{
-//	DisableIRP();
-//  	if(ScreenDataSeq.SeqFront == ScreenDataSeq.SeqRear)  //ª∫¥Êø’
-//  	{
-//		EnableIRP();
-//    	return Error;
-//  	}
-//	else
-//  	{
-//		//TUDO::∏√¥¶º”»Îflash∂¡»°
-//		SPI_FLASH_BufferRead(_DataFrame, ScreenDataSeq.DataHead[ScreenDataSeq.SeqRear].DataAddr , ScreenDataSeq.DataHead[ScreenDataSeq.SeqRear].DataLen);
-//		*_DataLen = ScreenDataSeq.DataHead[ScreenDataSeq.SeqRear].DataLen;
-//		if((ScreenDataSeq.DataHead[ScreenDataSeq.SeqRear].DataAddr / 4096) > 0)
-//		{
-//			SPI_FLASH_SectorErase(4096 * (ScreenDataSeq.DataHead[ScreenDataSeq.SeqRear].DataAddr / 4096 - 1));
-//		}
-//    	ScreenDataSeq.SeqRear = (ScreenDataSeq.SeqRear + 1) % Seqbufferlen; 
-//		// «∑Òª· ‹µΩ÷–∂œ”∞œÏ£ø
-//		EnableIRP();
-//    	return Ok;
-//		
-//  	} 
-//}
+/*œÚ485Ω” ’∂”¡–∑≈»Î“ª÷° ˝æ›*/
+State_typedef RS485RecSeqIn(unsigned char *_DataFrame, unsigned char _Frame_Cnt)
+{
+	DisableIRP();
+	if(((ScreenDataSeq.SeqFront+1) % Seqbufferlen) == ScreenDataSeq.SeqRear)  //ª∫¥Ê¬˙
+    {
+    	EnableIRP();
+    	return Error;
+  	}
+	memcpy(ScreenDataSeq.Data + ScreenDataSeq.SeqFront, _DataFrame, _Frame_Cnt * 12);
+//	ScreenDataSeq.RS485Frame[ScreenDataSeq.SeqFront]=*_DataFrame;
+  
+  	ScreenDataSeq.SeqFront = (ScreenDataSeq.SeqFront + _Frame_Cnt * 12) % Seqbufferlen;  //÷∏œÚ—≠ª∑0~£®RS485RecFrameBufferLen-1£©
+  	EnableIRP();
+  	return Ok;
+} 									 
+/*485Ω” ’∂”¡–≥ˆ∂”¡–£¨»Áπ˚∂”¡–Œ™ø’µƒª∞‘Ú∑µªÿError*/
+State_typedef RS485RecSeqOut(unsigned char *_DataFrame)
+{
+	DisableIRP();
+  	if(ScreenDataSeq.SeqFront == ScreenDataSeq.SeqRear)  //ª∫¥Êø’
+  	{
+    	EnableIRP();
+    	return Error;
+  	}
+	else
+  	{
+    	//Copy data
+    	*_DataFrame=ScreenDataSeq.Data[ScreenDataSeq.SeqRear];   
+    	ScreenDataSeq.SeqRear=(ScreenDataSeq.SeqRear + 12) % Seqbufferlen; 
+    	EnableIRP();
+    	return Ok;
+  	} 
+}

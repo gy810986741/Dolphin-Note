@@ -4,45 +4,30 @@
 #include "stm32f10x.h"
 #include <rtthread.h>
 
-#define Seqbufferlen 20//队列深度
-extern unsigned int DataFrame_in_Flash ;
-//unsigned char BEEP_STAT_Flag;
-//unsigned char ERR_Status;
+#define Seqbufferlen 1000//队列深度
+extern unsigned int DataFrame_in_Flash;
+
 typedef enum
 {
 	Ok		=(unsigned char)1, 
 	Error	=! Ok    
 }State_typedef;
-///*队列结构*/
-//typedef struct
-//{
-//	unsigned char	DataLen;//
-//	unsigned int	DataAddr;//
-//}SeqDataAddr_structdef;
 
-///*队列结构*/
-//typedef struct
-//{
-//	unsigned int			addr;//存入FLASH中的数据地址指针
-////	unsigned char			Seqlen;//队列深度
-//	SeqDataAddr_structdef	DataHead[Seqbufferlen];//数据长度
-//	unsigned int 			SeqFront;//队列的顶部，进数据
-//	unsigned int			SeqRear;//队列的底部，出数据
-//}ScreenSeq_structdef;
 /*队列结构*/
 typedef struct
 {
-//	unsigned int			addr;//存入FLASH中的数据地址指针
-//	unsigned char			Seqlen;//队列深度
-//	SeqDataAddr_structdef	DataHead[Seqbufferlen];//数据长度
-//volatile unsigned int	testa;
-//volatile unsigned int	testb;
-volatile unsigned int 			SeqFrontAddr;//队列的顶部，进数据
-volatile unsigned int			SeqRearAddr;//队列的底部，出数据
-volatile unsigned int			SeqReadAddr;
-//volatile unsigned int	testc;
-//volatile unsigned int	testd;
+	volatile unsigned int	SeqFrontAddr;//队列的顶部，进数据
+	volatile unsigned int	SeqRearAddr;//队列的底部，出数据
+	volatile unsigned int	SeqReadAddr;
 }FlashSeq_structdef;
+/*RS485队列结构*/
+typedef struct
+{
+	unsigned char	Data[Seqbufferlen];//队列中的数据
+	unsigned int	SeqFront;//队列的顶部，进数据
+	unsigned int	SeqRear;//队列的底部，出数据
+}BufferSeq_structdef;
+
 extern FlashSeq_structdef FlashScreenDataSeq;
 extern unsigned int time_base;
 extern unsigned char up_down_flag;
